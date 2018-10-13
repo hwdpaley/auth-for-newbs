@@ -2,7 +2,7 @@
   <section>
     <h1>Dashboard</h1>
     <h1 v-if="!user">Getting user information...</h1>
-    <h1 v-if="user">Hello, {{user.username}}!! 👋</h1>
+    <h1 v-if="user">Hello, {{user.name}}!! 👋</h1>
     <button @click="logout()" class="btn btn-primary">Logout</button>
     <br />
     <br />
@@ -51,33 +51,35 @@
 </template>
 
 <script>
-import MarkdownIt from 'markdown-it';
-import MDemoji from 'markdown-it-emoji';
+import MarkdownIt from "markdown-it";
+import MDemoji from "markdown-it-emoji";
 
 const md = new MarkdownIt();
 md.use(MDemoji);
 
-const API_URL = 'http://localhost:5000/';
+const API_URL = "http://localhost:5000/";
 
 export default {
   data: () => ({
     showForm: false,
     user: null,
     newNote: {
-      title: '',
-      note: '',
+      title: "",
+      note: ""
     },
-    notes: [],
+    notes: []
   }),
   mounted() {
-    fetch(API_URL, {
+    fetch(`${API_URL}auth/info`, {
       headers: {
-        authorization: `Bearer ${localStorage.token}`,
-      },
-    }).then(res => res.json())
-      .then((result) => {
-        if (result.user) {
-          this.user = result.user;
+        authorization: `Bearer ${localStorage.token}`
+      }
+    })
+      .then(res => res.json())
+      .then(result => {
+        console.log(result);
+        if (result.roles) {
+          this.user = result;
           this.getNotes();
         } else {
           this.logout();
@@ -91,36 +93,38 @@ export default {
     getNotes() {
       fetch(`${API_URL}api/v1/notes`, {
         headers: {
-          authorization: `Bearer ${localStorage.token}`,
-        },
-      }).then(res => res.json())
-        .then((notes) => {
+          authorization: `Bearer ${localStorage.token}`
+        }
+      })
+        .then(res => res.json())
+        .then(notes => {
           this.notes = notes;
         });
     },
     addNote() {
       fetch(`${API_URL}api/v1/notes`, {
-        method: 'post',
+        method: "post",
         body: JSON.stringify(this.newNote),
         headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${localStorage.token}`,
-        },
-      }).then(res => res.json())
-        .then((note) => {
+          "content-type": "application/json",
+          authorization: `Bearer ${localStorage.token}`
+        }
+      })
+        .then(res => res.json())
+        .then(note => {
           this.notes.push(note);
           this.newNote = {
-            title: '',
-            note: '',
+            title: "",
+            note: ""
           };
           this.showForm = false;
         });
     },
     logout() {
-      localStorage.removeItem('token');
-      this.$router.push('/login');
-    },
-  },
+      localStorage.removeItem("token");
+      this.$router.push("/login");
+    }
+  }
 };
 </script>
 

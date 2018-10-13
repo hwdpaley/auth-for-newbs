@@ -2,35 +2,33 @@ const express = require('express');
 const Joi = require('joi');
 
 const db = require('../db/connection');
-const notes = db.get('notes');
+const categories = db.get('categories');
 
 const schema = Joi.object().keys({
-  title: Joi.string().trim().max(100).required(),
-  note: Joi.string().trim().required()
+  name: Joi.string().trim().max(100).required(),
+  description: Joi.string().trim().required()
 });
 
 const router = express.Router();
 
-router.get('/v1/notes', (req, res) => {
-  notes.find({
-    user_id: req.user._id
-  }).then(notes => {
-    res.json(notes);
-  });
+router.get('/categories', (req, res) => {
+  categories.find()
+    .then(notes => {
+      res.json(notes);
+    });
 });
 
-router.post('/v1/notes', (req, res, next) => {
+router.post('/categories', (req, res, next) => {
   const result = Joi.validate(req.body, schema);
   if (result.error === null) {
-    const note = {
+    const category = {
       ...req.body,
-      user_id: req.user._id
     };
 
-    notes
-      .insert(note)
-      .then(note => {
-        res.json(note);
+    categories
+      .insert(category)
+      .then(category => {
+        res.json(category);
       });
   } else {
     const error = new Error(result.error);
